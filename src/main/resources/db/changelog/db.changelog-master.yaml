@@ -1,0 +1,11 @@
+databaseChangeLog:
+  # Master changelog.
+  # This file does not usually contain table definitions directly.
+  # Instead, it includes smaller changelog files in order.
+  #
+  # This makes database evolution easier to track:
+  # - one file per business requirement
+  # - one or more changesets per file
+
+  - include:
+      file: db/changelog/changes/001-init-database.yaml

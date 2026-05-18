@@ -1,0 +1,38 @@
+databaseChangeLog:
+  - changeSet:
+      id: BR-003-001-create-schema-version-test
+      author: andrei
+      comments: Validate that Liquibase can create database objects from the application.
+      changes:
+        - createTable:
+            tableName: schema_version_test
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: description
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: BR-003-002-insert-schema-version-test-record
+      author: andrei
+      comments: Insert a test record to confirm Liquibase execution.
+      changes:
+        - insert:
+            tableName: schema_version_test
+            columns:
+              - column:
+                  name: description
+                  value: Liquibase migration support initialized

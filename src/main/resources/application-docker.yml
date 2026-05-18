@@ -1,9 +1,18 @@
 #Docker specific Spring Boot configuration.
-#This profile is enabled from docker-compose.yml using: SPRING_PROFILES_ACTIVE=docker
+#This profile is d from docker-compose.yml using: SPRING_PROFILES_ACTIVE=docker
 
 spring:
   application:
     name: binance-market-data-ingestion
+
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:market_data_ingestion}
+    username: ${POSTGRES_USER:market_user}
+    password: ${POSTGRES_PASSWORD:market_password}
+    driver-class-name: org.postgresql.Driver
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
 
 server:
   port: ${SERVER_PORT:8080}
