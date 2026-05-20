@@ -1,0 +1,68 @@
+databaseChangeLog:
+  - changeSet:
+      id: BR-004-001-create-exchanges-table
+      author: andrei
+      comments: Create exchanges catalog table.
+      changes:
+        - createTable:
+            tableName: exchanges
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_exchanges
+                    nullable: false
+
+              - column:
+                  name: code
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_exchanges_code
+
+              - column:
+                  name: name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: rest_base_url
+                  type: VARCHAR(255)
+
+              - column:
+                  name: websocket_base_url
+                  type: VARCHAR(255)
+
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: TIMESTAMPTZ
+
+  - changeSet:
+      id: BR-004-002-create-exchanges-active-index
+      author: andrei
+      comments: Add index for filtering active exchanges.
+      changes:
+        - createIndex:
+            tableName: exchanges
+            indexName: idx_exchanges_is_active
+            columns:
+              - column:
+                  name: is_active
