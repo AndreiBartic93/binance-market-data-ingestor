@@ -1,0 +1,36 @@
+databaseChangeLog:
+  - changeSet:
+      id: BR-004-003-seed-binance-exchange
+      author: andrei
+      comments: Insert Binance exchange reference data.
+      changes:
+        - sql:
+            dbms: postgresql
+            splitStatements: false
+            stripComments: true
+            sql: |
+              INSERT INTO exchanges (
+                  code,
+                  name,
+                  rest_base_url,
+                  websocket_base_url,
+                  is_active,
+                  created_at,
+                  updated_at
+              )
+              VALUES (
+                  'BINANCE',
+                  'Binance',
+                  'https://api.binance.com',
+                  'wss://stream.binance.com:9443',
+                  true,
+                  now(),
+                  null
+              )
+              ON CONFLICT (code) DO UPDATE
+              SET
+                  name = EXCLUDED.name,
+                  rest_base_url = EXCLUDED.rest_base_url,
+                  websocket_base_url = EXCLUDED.websocket_base_url,
+                  is_active = EXCLUDED.is_active,
+                  updated_at = now();
