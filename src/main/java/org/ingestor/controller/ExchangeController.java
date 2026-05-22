@@ -2,7 +2,7 @@ package org.ingestor.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.ingestor.dto.UpdateExchangeRequest;
+import org.ingestor.dto.exchange.UpdateExchangeRequest;
 import org.ingestor.dto.exchange.CreateExchangeRequest;
 import org.ingestor.dto.exchange.ExchangeResponse;
 import org.ingestor.service.ExchangeService;

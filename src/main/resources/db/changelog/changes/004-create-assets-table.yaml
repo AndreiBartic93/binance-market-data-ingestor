@@ -1,0 +1,76 @@
+databaseChangeLog:
+  - changeSet:
+      id: BR-005-001-create-assets-table
+      author: andrei
+      comments: Create assets catalog table.
+      changes:
+        - createTable:
+            tableName: assets
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_assets
+                    nullable: false
+
+              - column:
+                  name: symbol
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_assets_symbol
+
+              - column:
+                  name: name
+                  type: VARCHAR(100)
+
+              - column:
+                  name: asset_type
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: TIMESTAMPTZ
+
+  - changeSet:
+      id: BR-005-002-create-assets-active-index
+      author: andrei
+      comments: Add index for filtering active assets.
+      changes:
+        - createIndex:
+            tableName: assets
+            indexName: idx_assets_is_active
+            columns:
+              - column:
+                  name: is_active
+
+  - changeSet:
+      id: BR-005-003-create-assets-type-index
+      author: andrei
+      comments: Add index for filtering assets by type.
+      changes:
+        - createIndex:
+            tableName: assets
+            indexName: idx_assets_asset_type
+            columns:
+              - column:
+                  name: asset_type

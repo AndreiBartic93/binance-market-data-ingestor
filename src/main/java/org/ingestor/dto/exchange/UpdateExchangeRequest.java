@@ -1,4 +1,4 @@
-package org.ingestor.dto;
+package org.ingestor.dto.exchange;
 
 import jakarta.validation.constraints.Size;
 

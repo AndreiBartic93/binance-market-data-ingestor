@@ -1,12 +1,13 @@
 package org.ingestor.service;
 
 import lombok.RequiredArgsConstructor;
-import org.ingestor.dto.UpdateExchangeRequest;
+import org.ingestor.dto.exchange.UpdateExchangeRequest;
 import org.ingestor.dto.exchange.CreateExchangeRequest;
 import org.ingestor.dto.exchange.ExchangeResponse;
 import org.ingestor.entity.Exchange;
 import org.ingestor.exception.ResourceNotFoundException;
 import org.ingestor.repository.ExchangeRepository;
+import org.ingestor.util.UpdateUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,10 +52,10 @@ public class ExchangeService {
     public ExchangeResponse update(Long id, UpdateExchangeRequest request) {
         Exchange exchange = getExchangeById(id);
 
-        setIfNotNull(request.name(), exchange::setName);
-        setIfNotNull(request.restBaseUrl(), exchange::setRestBaseUrl);
-        setIfNotNull(request.webSocketBaseUrl(), exchange::setWebsocketBaseUrl);
-        setIfNotNull(request.active(), exchange::setActive);
+        UpdateUtils.setIfNotNull(request.name(), exchange::setName);
+        UpdateUtils.setIfNotNull(request.restBaseUrl(), exchange::setRestBaseUrl);
+        UpdateUtils.setIfNotNull(request.webSocketBaseUrl(), exchange::setWebsocketBaseUrl);
+        UpdateUtils.setIfNotNull(request.active(), exchange::setActive);
 
         return toResponse(exchange);
     }
@@ -71,12 +72,6 @@ public class ExchangeService {
         Exchange exchange = getExchangeById(id);
         exchange.setActive(false);
         return toResponse(exchange);
-    }
-
-    private <T> void setIfNotNull(T value, Consumer<T> setter) {
-        if (value != null) {
-            setter.accept(value);
-        }
     }
 
     private Exchange getExchangeById(Long id) {
