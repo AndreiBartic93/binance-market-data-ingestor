@@ -1,6 +1,6 @@
 package org.ingestor.dto.asset;
 
-import org.ingestor.entity.AssetType;
+import org.ingestor.entity.enums.AssetType;
 
 import java.time.OffsetDateTime;
 

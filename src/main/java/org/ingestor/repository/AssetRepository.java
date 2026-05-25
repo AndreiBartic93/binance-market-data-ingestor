@@ -1,7 +1,7 @@
 package org.ingestor.repository;
 
 import org.ingestor.entity.Asset;
-import org.ingestor.entity.AssetType;
+import org.ingestor.entity.enums.AssetType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

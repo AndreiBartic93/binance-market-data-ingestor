@@ -3,7 +3,7 @@ package org.ingestor.dto.asset;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import org.ingestor.entity.AssetType;
+import org.ingestor.entity.enums.AssetType;
 
 public record CreateAssetRequest (
 

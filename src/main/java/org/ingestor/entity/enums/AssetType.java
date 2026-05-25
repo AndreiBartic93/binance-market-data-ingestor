@@ -1,4 +1,4 @@
-package org.ingestor.entity;
+package org.ingestor.entity.enums;
 
 /**
  * Describes the type of asset stored in the catalog.

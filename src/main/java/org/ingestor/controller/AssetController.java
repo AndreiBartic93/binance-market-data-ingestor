@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.ingestor.dto.asset.AssetResponse;
 import org.ingestor.dto.asset.CreateAssetRequest;
 import org.ingestor.dto.asset.UpdateAssetRequest;
-import org.ingestor.entity.AssetType;
+import org.ingestor.entity.enums.AssetType;
 import org.ingestor.service.AssetService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;

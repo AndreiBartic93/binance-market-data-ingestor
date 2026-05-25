@@ -1,12 +1,11 @@
 package org.ingestor.service;
 
 import lombok.RequiredArgsConstructor;
-import org.hibernate.sql.Update;
 import org.ingestor.dto.asset.AssetResponse;
 import org.ingestor.dto.asset.CreateAssetRequest;
 import org.ingestor.dto.asset.UpdateAssetRequest;
 import org.ingestor.entity.Asset;
-import org.ingestor.entity.AssetType;
+import org.ingestor.entity.enums.AssetType;
 import org.ingestor.exception.ResourceNotFoundException;
 import org.ingestor.repository.AssetRepository;
 import org.ingestor.util.UpdateUtils;

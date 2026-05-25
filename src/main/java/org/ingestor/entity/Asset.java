@@ -2,6 +2,7 @@ package org.ingestor.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.ingestor.entity.enums.AssetType;
 
 import java.time.OffsetDateTime;
 

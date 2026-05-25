@@ -1,0 +1,150 @@
+databaseChangeLog:
+  - changeSet:
+      id: BR-006-001-create-trading-pairs-table
+      author: andrei
+      comments: Create trading pairs catalog table.
+      changes:
+        - createTable:
+            tableName: trading_pairs
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_trading_pairs
+                    nullable: false
+
+              - column:
+                  name: exchange_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: base_asset_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: quote_asset_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: symbol
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: status
+                  type: VARCHAR(30)
+                  defaultValue: ACTIVE
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: price_precision
+                  type: INT
+
+              - column:
+                  name: quantity_precision
+                  type: INT
+
+              - column:
+                  name: min_quantity
+                  type: NUMERIC(38, 18)
+
+              - column:
+                  name: max_quantity
+                  type: NUMERIC(38, 18)
+
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: TIMESTAMPTZ
+
+  - changeSet:
+      id: BR-006-002-add-trading-pairs-foreign-keys
+      author: andrei
+      comments: Link trading pairs to exchanges and assets.
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: trading_pairs
+            baseColumnNames: exchange_id
+            referencedTableName: exchanges
+            referencedColumnNames: id
+            constraintName: fk_trading_pairs_exchange
+
+        - addForeignKeyConstraint:
+            baseTableName: trading_pairs
+            baseColumnNames: base_asset_id
+            referencedTableName: assets
+            referencedColumnNames: id
+            constraintName: fk_trading_pairs_base_asset
+
+        - addForeignKeyConstraint:
+            baseTableName: trading_pairs
+            baseColumnNames: quote_asset_id
+            referencedTableName: assets
+            referencedColumnNames: id
+            constraintName: fk_trading_pairs_quote_asset
+
+  - changeSet:
+      id: BR-006-003-add-trading-pairs-unique-constraint
+      author: andrei
+      comments: Ensure trading pair symbol is unique per exchange.
+      changes:
+        - addUniqueConstraint:
+            tableName: trading_pairs
+            columnNames: exchange_id, symbol
+            constraintName: uk_trading_pairs_exchange_symbol
+
+  - changeSet:
+      id: BR-006-004-create-trading-pairs-indexes
+      author: andrei
+      comments: Add indexes for common trading pair queries.
+      changes:
+        - createIndex:
+            tableName: trading_pairs
+            indexName: idx_trading_pairs_exchange_id
+            columns:
+              - column:
+                  name: exchange_id
+
+        - createIndex:
+            tableName: trading_pairs
+            indexName: idx_trading_pairs_base_asset_id
+            columns:
+              - column:
+                  name: base_asset_id
+
+        - createIndex:
+            tableName: trading_pairs
+            indexName: idx_trading_pairs_quote_asset_id
+            columns:
+              - column:
+                  name: quote_asset_id
+
+        - createIndex:
+            tableName: trading_pairs
+            indexName: idx_trading_pairs_is_active
+            columns:
+              - column:
+                  name: is_active
