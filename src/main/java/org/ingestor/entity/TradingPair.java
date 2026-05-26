@@ -63,7 +63,7 @@ public class TradingPair {
     private Integer pricePrecision;
 
     @Column(name = "quantity_precision")
-    private Integer qualityPrecision;
+    private Integer quantityPrecision;
 
     @Column(name = "min_quantity", precision = 38, scale = 18)
     private BigDecimal minQuantity;
