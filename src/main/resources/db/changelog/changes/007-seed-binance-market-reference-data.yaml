@@ -1,0 +1,160 @@
+databaseChangeLog:
+  - changeSet:
+      id: BR-008-001-seed-binance-assets
+      author: andrei
+      comments: Seed base Binance assets used for initial trading pairs.
+      changes:
+        - sql:
+            dbms: postgresql
+            splitStatements: false
+            stripComments: true
+            sql: |
+              -- Assets are inserted in an idempotent way.
+              -- If the asset already exists, we update its reference data.
+              INSERT INTO assets (
+                  symbol,
+                  name,
+                  asset_type,
+                  is_active,
+                  created_at,
+                  updated_at
+              )
+              VALUES
+                  ('BTC',  'Bitcoin',  'CRYPTO',     true, now(), null),
+                  ('ETH',  'Ethereum', 'CRYPTO',     true, now(), null),
+                  ('SOL',  'Solana',   'CRYPTO',     true, now(), null),
+                  ('BNB',  'BNB',      'CRYPTO',     true, now(), null),
+                  ('USDT', 'Tether',   'STABLECOIN', true, now(), null)
+              ON CONFLICT (symbol) DO UPDATE
+              SET
+                  name = EXCLUDED.name,
+                  asset_type = EXCLUDED.asset_type,
+                  is_active = EXCLUDED.is_active,
+                  updated_at = now();
+
+  - changeSet:
+      id: BR-008-002-seed-binance-timeframes
+      author: andrei
+      comments: Seed Binance-supported timeframes used for candle ingestion.
+      changes:
+        - sql:
+            dbms: postgresql
+            splitStatements: false
+            stripComments: true
+            sql: |
+              -- The code column is the exact value sent to Binance API.
+              -- duration_minutes is used internally for gap detection,
+              -- watermark calculation and scheduled synchronization.
+              INSERT INTO timeframes (
+                  code,
+                  duration_minutes,
+                  is_active,
+                  created_at,
+                  updated_at
+              )
+              VALUES
+                  ('1m',  1,    true, now(), null),
+                  ('5m',  5,    true, now(), null),
+                  ('15m', 15,   true, now(), null),
+                  ('1h',  60,   true, now(), null),
+                  ('4h',  240,  true, now(), null),
+                  ('1d',  1440, true, now(), null)
+              ON CONFLICT (code) DO UPDATE
+              SET
+                  duration_minutes = EXCLUDED.duration_minutes,
+                  is_active = EXCLUDED.is_active,
+                  updated_at = now();
+
+  - changeSet:
+      id: BR-008-003-seed-binance-trading-pairs
+      author: andrei
+      comments: Seed initial Binance trading pairs used for ingestion testing.
+      changes:
+        - sql:
+            dbms: postgresql
+            splitStatements: false
+            stripComments: true
+            sql: |
+              -- Trading pairs link:
+              -- exchange + base asset + quote asset.
+              --
+              -- We intentionally keep precision fields nullable here.
+              -- They can later be synchronized from Binance exchange info.
+              INSERT INTO trading_pairs (
+                  exchange_id,
+                  base_asset_id,
+                  quote_asset_id,
+                  symbol,
+                  status,
+                  price_precision,
+                  quantity_precision,
+                  min_quantity,
+                  max_quantity,
+                  is_active,
+                  created_at,
+                  updated_at
+              )
+              VALUES
+                  (
+                      (SELECT id FROM exchanges WHERE code = 'BINANCE'),
+                      (SELECT id FROM assets WHERE symbol = 'BTC'),
+                      (SELECT id FROM assets WHERE symbol = 'USDT'),
+                      'BTCUSDT',
+                      'ACTIVE',
+                      null,
+                      null,
+                      null,
+                      null,
+                      true,
+                      now(),
+                      null
+                  ),
+                  (
+                      (SELECT id FROM exchanges WHERE code = 'BINANCE'),
+                      (SELECT id FROM assets WHERE symbol = 'ETH'),
+                      (SELECT id FROM assets WHERE symbol = 'USDT'),
+                      'ETHUSDT',
+                      'ACTIVE',
+                      null,
+                      null,
+                      null,
+                      null,
+                      true,
+                      now(),
+                      null
+                  ),
+                  (
+                      (SELECT id FROM exchanges WHERE code = 'BINANCE'),
+                      (SELECT id FROM assets WHERE symbol = 'SOL'),
+                      (SELECT id FROM assets WHERE symbol = 'USDT'),
+                      'SOLUSDT',
+                      'ACTIVE',
+                      null,
+                      null,
+                      null,
+                      null,
+                      true,
+                      now(),
+                      null
+                  ),
+                  (
+                      (SELECT id FROM exchanges WHERE code = 'BINANCE'),
+                      (SELECT id FROM assets WHERE symbol = 'BNB'),
+                      (SELECT id FROM assets WHERE symbol = 'USDT'),
+                      'BNBUSDT',
+                      'ACTIVE',
+                      null,
+                      null,
+                      null,
+                      null,
+                      true,
+                      now(),
+                      null
+                  )
+              ON CONFLICT (exchange_id, symbol) DO UPDATE
+              SET
+                  base_asset_id = EXCLUDED.base_asset_id,
+                  quote_asset_id = EXCLUDED.quote_asset_id,
+                  status = EXCLUDED.status,
+                  is_active = EXCLUDED.is_active,
+                  updated_at = now();

@@ -21,3 +21,5 @@ databaseChangeLog:
       file: db/changelog/changes/005-create-trading-pairs-table.yaml
   - include:
       file: db/changelog/changes/006-create-timeframes-table.yaml
+  - include:
+      file: db/changelog/changes/007-seed-binance-market-reference-data.yaml
