@@ -1,0 +1,72 @@
+databaseChangeLog:
+  - changeSet:
+      id: BR-007-001-create-timeframes-table
+      author: andrei
+      comments: Create timeframes catalog table.
+      changes:
+        - createTable:
+            tableName: timeframes
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_timeframes
+                    nullable: false
+
+              - column:
+                  name: code
+                  type: VARCHAR(10)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_timeframes_code
+
+              - column:
+                  name: duration_minutes
+                  type: INT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: TIMESTAMPTZ
+
+  - changeSet:
+      id: BR-007-002-create-timeframes-active-index
+      author: andrei
+      comments: Add index for filtering active timeframes.
+      changes:
+        - createIndex:
+            tableName: timeframes
+            indexName: idx_timeframes_is_active
+            columns:
+              - column:
+                  name: is_active
+
+  - changeSet:
+      id: BR-007-003-create-timeframes-duration-index
+      author: andrei
+      comments: Add index for ordering and filtering timeframes by duration.
+      changes:
+        - createIndex:
+            tableName: timeframes
+            indexName: idx_timeframes_duration_minutes
+            columns:
+              - column:
+                  name: duration_minutes
