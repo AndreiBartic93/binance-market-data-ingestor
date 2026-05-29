@@ -1,0 +1,147 @@
+databaseChangeLog:
+  - changeSet:
+      id: BR-009-001-create-market-data-subscriptions-table
+      author: andrei
+      comments: Create market data subscriptions table linking trading pairs and timeframes.
+      changes:
+        - createTable:
+            tableName: market_data_subscriptions
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_market_data_subscriptions
+                    nullable: false
+
+              - column:
+                  name: trading_pair_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: timeframe_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: collect_historical
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: collect_scheduled
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: collect_live
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: websocket_stream_name
+                  type: VARCHAR(150)
+
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: TIMESTAMPTZ
+
+  - changeSet:
+      id: BR-009-002-add-market-data-subscriptions-foreign-keys
+      author: andrei
+      comments: Link subscriptions to trading pairs and timeframes.
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: market_data_subscriptions
+            baseColumnNames: trading_pair_id
+            referencedTableName: trading_pairs
+            referencedColumnNames: id
+            constraintName: fk_market_data_subscriptions_trading_pair
+
+        - addForeignKeyConstraint:
+            baseTableName: market_data_subscriptions
+            baseColumnNames: timeframe_id
+            referencedTableName: timeframes
+            referencedColumnNames: id
+            constraintName: fk_market_data_subscriptions_timeframe
+
+  - changeSet:
+      id: BR-009-003-add-market-data-subscriptions-unique-constraint
+      author: andrei
+      comments: Ensure a trading pair can have only one subscription per timeframe.
+      changes:
+        - addUniqueConstraint:
+            tableName: market_data_subscriptions
+            columnNames: trading_pair_id, timeframe_id
+            constraintName: uk_market_data_subscriptions_pair_timeframe
+
+  - changeSet:
+      id: BR-009-004-create-market-data-subscriptions-indexes
+      author: andrei
+      comments: Add indexes for common subscription queries.
+      changes:
+        - createIndex:
+            tableName: market_data_subscriptions
+            indexName: idx_market_data_subscriptions_trading_pair_id
+            columns:
+              - column:
+                  name: trading_pair_id
+
+        - createIndex:
+            tableName: market_data_subscriptions
+            indexName: idx_market_data_subscriptions_timeframe_id
+            columns:
+              - column:
+                  name: timeframe_id
+
+        - createIndex:
+            tableName: market_data_subscriptions
+            indexName: idx_market_data_subscriptions_is_active
+            columns:
+              - column:
+                  name: is_active
+
+        - createIndex:
+            tableName: market_data_subscriptions
+            indexName: idx_market_data_subscriptions_collect_historical
+            columns:
+              - column:
+                  name: collect_historical
+
+        - createIndex:
+            tableName: market_data_subscriptions
+            indexName: idx_market_data_subscriptions_collect_scheduled
+            columns:
+              - column:
+                  name: collect_scheduled
+
+        - createIndex:
+            tableName: market_data_subscriptions
+            indexName: idx_market_data_subscriptions_collect_live
+            columns:
+              - column:
+                  name: collect_live
