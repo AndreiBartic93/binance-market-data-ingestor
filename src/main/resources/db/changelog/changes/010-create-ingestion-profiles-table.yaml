@@ -1,0 +1,85 @@
+databaseChangeLog:
+  - changeSet:
+      id: BR-012-001-create-ingestion-profiles-table
+      author: andrei
+      comments: Create ingestion profiles table.
+      changes:
+        - createTable:
+            tableName: ingestion_profiles
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_ingestion_profiles
+                    nullable: false
+
+              - column:
+                  name: name
+                  type: VARCHAR(150)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_ingestion_profiles_name
+
+              - column:
+                  name: ingestion_method
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: description
+                  type: TEXT
+
+              - column:
+                  name: stores_market_data
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: TIMESTAMPTZ
+
+  - changeSet:
+      id: BR-012-002-create-ingestion-profiles-indexes
+      author: andrei
+      comments: Add indexes for querying ingestion profiles.
+      changes:
+        - createIndex:
+            tableName: ingestion_profiles
+            indexName: idx_ingestion_profiles_ingestion_method
+            columns:
+              - column:
+                  name: ingestion_method
+
+        - createIndex:
+            tableName: ingestion_profiles
+            indexName: idx_ingestion_profiles_is_active
+            columns:
+              - column:
+                  name: is_active
+
+        - createIndex:
+            tableName: ingestion_profiles
+            indexName: idx_ingestion_profiles_stores_market_data
+            columns:
+              - column:
+                  name: stores_market_data

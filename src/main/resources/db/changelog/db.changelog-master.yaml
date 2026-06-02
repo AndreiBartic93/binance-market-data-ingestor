@@ -27,3 +27,5 @@ databaseChangeLog:
       file: db/changelog/changes/008-create-market-data-subscriptions-table.yaml
   - include:
       file: db/changelog/changes/009-create-ingestion-watermarks-table.yaml
+  - include:
+      file: db/changelog/changes/010-create-ingestion-profiles-table.yaml

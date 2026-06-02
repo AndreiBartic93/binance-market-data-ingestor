@@ -1,0 +1,82 @@
+# ============================================================
+# BR-012 Ingestion profiles
+# ============================================================
+
+### Get all ingestion profiles
+GET {{baseUrl}}/api/ingestion-profiles
+
+
+### Get active ingestion profiles
+GET {{baseUrl}}/api/ingestion-profiles?activeOnly=true
+
+
+### Get REST historical profiles
+GET {{baseUrl}}/api/ingestion-profiles?ingestionMethod=REST_HISTORICAL
+
+
+### Get scheduled sync profiles
+GET {{baseUrl}}/api/ingestion-profiles?ingestionMethod=SCHEDULED_SYNC
+
+
+### Get websocket live profiles
+GET {{baseUrl}}/api/ingestion-profiles?ingestionMethod=WEBSOCKET_LIVE
+
+
+### Create REST historical ingestion profile
+POST {{baseUrl}}/api/ingestion-profiles
+Content-Type: application/json
+
+{
+  "name": "Binance REST Historical Import",
+  "ingestionMethod": "REST_HISTORICAL",
+  "description": "Imports historical candles from Binance REST API."
+}
+
+
+### Create scheduled sync ingestion profile
+POST {{baseUrl}}/api/ingestion-profiles
+Content-Type: application/json
+
+{
+  "name": "Binance Scheduled Sync",
+  "ingestionMethod": "SCHEDULED_SYNC",
+  "description": "Synchronizes new candles periodically from Binance REST API."
+}
+
+
+### Create WebSocket live ingestion profile
+POST {{baseUrl}}/api/ingestion-profiles
+Content-Type: application/json
+
+{
+  "name": "Binance WebSocket Live",
+  "ingestionMethod": "WEBSOCKET_LIVE",
+  "description": "Processes live Binance WebSocket kline messages without persisting raw market data."
+}
+
+
+### Get ingestion profile by ID
+GET {{baseUrl}}/api/ingestion-profiles/1
+
+
+### Get ingestion profile by name
+GET {{baseUrl}}/api/ingestion-profiles/name/Binance REST Historical Import
+
+
+### Update ingestion profile
+PATCH {{baseUrl}}/api/ingestion-profiles/1
+Content-Type: application/json
+
+{
+  "name": "Binance REST Historical Import",
+  "description": "Imports historical Binance candles and stores them in the database.",
+  "active": true
+}
+
+
+### Deactivate ingestion profile
+PATCH {{baseUrl}}/api/ingestion-profiles/1/deactivate
+
+
+### Activate ingestion profile
+PATCH {{baseUrl}}/api/ingestion-profiles/1/activate
