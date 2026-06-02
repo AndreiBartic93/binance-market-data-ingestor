@@ -1,0 +1,24 @@
+### Create subscription for BTCUSDT + 4h
+POST http://localhost:8080/api/market-data-subscriptions
+Content-Type: application/json
+
+{
+  "tradingPairId": 1,
+  "timeframeId": 5,
+  "collectHistorical": true,
+  "collectScheduled": true,
+  "collectLive": false
+}
+
+
+### Create live subscription for BTCUSDT + 1m
+POST http://localhost:8080/api/market-data-subscriptions
+Content-Type: application/json
+
+{
+  "tradingPairId": 1,
+  "timeframeId": 1,
+  "collectHistorical": false,
+  "collectScheduled": false,
+  "collectLive": true
+}
