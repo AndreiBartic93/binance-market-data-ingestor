@@ -4,10 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.ingestor.dto.subscription.CreateMarketDataSubscriptionRequest;
 import org.ingestor.dto.subscription.MarketDataSubscriptionResponse;
 import org.ingestor.dto.subscription.UpdateMarketDataSubscriptionRequest;
+import org.ingestor.entity.IngestionWatermark;
 import org.ingestor.entity.MarketDataSubscription;
 import org.ingestor.entity.Timeframe;
 import org.ingestor.entity.TradingPair;
 import org.ingestor.exception.ResourceNotFoundException;
+import org.ingestor.repository.IngestionWatermarkRepository;
 import org.ingestor.repository.MarketDataSubscriptionRepository;
 import org.ingestor.repository.TimeframeRepository;
 import org.ingestor.repository.TradingPairRepository;
@@ -24,6 +26,7 @@ public class MarketDataSubscriptionService {
     private final MarketDataSubscriptionRepository subscriptionRepository;
     private final TradingPairRepository tradingPairRepository;
     private final TimeframeRepository timeframeRepository;
+    private final IngestionWatermarkRepository ingestionWatermarkRepository;
 
     @Transactional
     public MarketDataSubscriptionResponse create(CreateMarketDataSubscriptionRequest request) {
@@ -65,6 +68,12 @@ public class MarketDataSubscriptionService {
                 .build();
 
         MarketDataSubscription savedSubscription = subscriptionRepository.save(subscription);
+
+        IngestionWatermark watermark = IngestionWatermark.builder()
+                .marketDataSubscription(savedSubscription)
+                .build();
+
+        ingestionWatermarkRepository.save(watermark);
 
         return toResponse(savedSubscription);
     }
