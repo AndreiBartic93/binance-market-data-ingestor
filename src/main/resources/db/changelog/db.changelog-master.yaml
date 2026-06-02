@@ -25,3 +25,5 @@ databaseChangeLog:
       file: db/changelog/changes/007-seed-binance-market-reference-data.yaml
   - include:
       file: db/changelog/changes/008-create-market-data-subscriptions-table.yaml
+  - include:
+      file: db/changelog/changes/009-create-ingestion-watermarks-table.yaml
