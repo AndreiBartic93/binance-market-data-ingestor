@@ -11,10 +11,12 @@ public interface IngestionProfileSubscriptionRepository extends JpaRepository<In
             Long ingestionProfileId,
             Long marketDataSubscriptionId
     );
+
     boolean existsByIngestionProfileIdAndMarketDataSubscriptionId(
             Long ingestionProfileId,
             Long marketDataSubscriptionId
     );
+
     List<IngestionProfileSubscription> findByIngestionProfileId(Long ingestionProfileId);
 
     List<IngestionProfileSubscription> findByMarketDataSubscriptionId(Long marketDataSubscriptionId);
