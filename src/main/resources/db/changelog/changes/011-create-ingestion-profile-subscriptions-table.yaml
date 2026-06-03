@@ -1,0 +1,101 @@
+databaseChangeLog:
+  - changeSet:
+      id: BR-014-001-create-ingestion-profile-subscriptions-table
+      author: andrei
+      comments: Create join table between ingestion profiles and market data subscriptions.
+      changes:
+        - createTable:
+            tableName: ingestion_profile_subscriptions
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_ingestion_profile_subscriptions
+                    nullable: false
+
+              - column:
+                  name: ingestion_profile_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: market_data_subscription_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: TIMESTAMPTZ
+
+  - changeSet:
+      id: BR-014-002-add-ingestion-profile-subscriptions-foreign-keys
+      author: andrei
+      comments: Link ingestion profile subscriptions to profiles and market data subscriptions.
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: ingestion_profile_subscriptions
+            baseColumnNames: ingestion_profile_id
+            referencedTableName: ingestion_profiles
+            referencedColumnNames: id
+            constraintName: fk_ingestion_profile_subscriptions_profile
+
+        - addForeignKeyConstraint:
+            baseTableName: ingestion_profile_subscriptions
+            baseColumnNames: market_data_subscription_id
+            referencedTableName: market_data_subscriptions
+            referencedColumnNames: id
+            constraintName: fk_ingestion_profile_subscriptions_subscription
+
+  - changeSet:
+      id: BR-014-003-add-ingestion-profile-subscriptions-unique-constraint
+      author: andrei
+      comments: Ensure a profile can be linked only once to the same subscription.
+      changes:
+        - addUniqueConstraint:
+            tableName: ingestion_profile_subscriptions
+            columnNames: ingestion_profile_id, market_data_subscription_id
+            constraintName: uk_ingestion_profile_subscriptions_profile_subscription
+
+  - changeSet:
+      id: BR-014-004-create-ingestion-profile-subscriptions-indexes
+      author: andrei
+      comments: Add indexes for common profile subscription queries.
+      changes:
+        - createIndex:
+            tableName: ingestion_profile_subscriptions
+            indexName: idx_ingestion_profile_subscriptions_profile_id
+            columns:
+              - column:
+                  name: ingestion_profile_id
+
+        - createIndex:
+            tableName: ingestion_profile_subscriptions
+            indexName: idx_ingestion_profile_subscriptions_subscription_id
+            columns:
+              - column:
+                  name: market_data_subscription_id
+
+        - createIndex:
+            tableName: ingestion_profile_subscriptions
+            indexName: idx_ingestion_profile_subscriptions_is_active
+            columns:
+              - column:
+                  name: is_active
