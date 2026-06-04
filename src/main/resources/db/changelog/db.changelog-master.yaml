@@ -31,3 +31,5 @@ databaseChangeLog:
       file: db/changelog/changes/010-create-ingestion-profiles-table.yaml
   - include:
       file: db/changelog/changes/011-create-ingestion-profile-subscriptions-table.yaml
+  - include:
+      file: db/changelog/changes/012-create-ingestion-runs-table.yaml

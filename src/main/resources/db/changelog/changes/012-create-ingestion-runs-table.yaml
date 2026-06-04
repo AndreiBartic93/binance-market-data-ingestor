@@ -1,0 +1,203 @@
+databaseChangeLog:
+  - changeSet:
+      id: BR-015-001-create-ingestion-runs-table
+      author: andrei
+      comments: Create ingestion runs table for tracking ingestion executions.
+      changes:
+        - createTable:
+            tableName: ingestion_runs
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_ingestion_runs
+                    nullable: false
+
+              - column:
+                  name: ingestion_profile_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: market_data_subscription_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: batch_id
+                  type: VARCHAR(100)
+
+              - column:
+                  name: status
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: started_at
+                  type: TIMESTAMPTZ
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: finished_at
+                  type: TIMESTAMPTZ
+
+              - column:
+                  name: from_time
+                  type: TIMESTAMPTZ
+
+              - column:
+                  name: to_time
+                  type: TIMESTAMPTZ
+
+              - column:
+                  name: records_requested
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: records_received
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: records_inserted
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: records_skipped
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: records_failed
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: messages_received
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: messages_processed
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: messages_failed
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: error_message
+                  type: TEXT
+
+              - column:
+                  name: metadata
+                  type: JSONB
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: TIMESTAMPTZ
+
+  - changeSet:
+      id: BR-015-002-add-ingestion-runs-foreign-keys
+      author: andrei
+      comments: Link ingestion runs to profiles and market data subscriptions.
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: ingestion_runs
+            baseColumnNames: ingestion_profile_id
+            referencedTableName: ingestion_profiles
+            referencedColumnNames: id
+            constraintName: fk_ingestion_runs_profile
+
+        - addForeignKeyConstraint:
+            baseTableName: ingestion_runs
+            baseColumnNames: market_data_subscription_id
+            referencedTableName: market_data_subscriptions
+            referencedColumnNames: id
+            constraintName: fk_ingestion_runs_subscription
+
+  - changeSet:
+      id: BR-015-003-create-ingestion-runs-indexes
+      author: andrei
+      comments: Add indexes for querying ingestion runs.
+      changes:
+        - createIndex:
+            tableName: ingestion_runs
+            indexName: idx_ingestion_runs_profile_id
+            columns:
+              - column:
+                  name: ingestion_profile_id
+
+        - createIndex:
+            tableName: ingestion_runs
+            indexName: idx_ingestion_runs_subscription_id
+            columns:
+              - column:
+                  name: market_data_subscription_id
+
+        - createIndex:
+            tableName: ingestion_runs
+            indexName: idx_ingestion_runs_batch_id
+            columns:
+              - column:
+                  name: batch_id
+
+        - createIndex:
+            tableName: ingestion_runs
+            indexName: idx_ingestion_runs_status
+            columns:
+              - column:
+                  name: status
+
+        - createIndex:
+            tableName: ingestion_runs
+            indexName: idx_ingestion_runs_started_at
+            columns:
+              - column:
+                  name: started_at
+
+  - changeSet:
+      id: BR-015-004-add-watermark-last-run-foreign-key
+      author: andrei
+      comments: Link ingestion watermarks last_ingestion_run_id to ingestion runs.
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: ingestion_watermarks
+            baseColumnNames: last_ingestion_run_id
+            referencedTableName: ingestion_runs
+            referencedColumnNames: id
+            constraintName: fk_ingestion_watermarks_last_run
