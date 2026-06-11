@@ -33,4 +33,16 @@ public class GlobalExceptionHandler {
         problemDetail.setDetail("Request body contains invalid fields. e:" + e.getMessage());
         return problemDetail;
     }
+
+    @ExceptionHandler(BinanceApiException.class)
+    public ProblemDetail handleBinanceApiException(BinanceApiException e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_GATEWAY,
+                e.getMessage()
+        );
+
+        problemDetail.setTitle("Binance Api Error");
+
+        return problemDetail;
+    }
 }
