@@ -1,0 +1,182 @@
+databaseChangeLog:
+  - changeSet:
+      id: BR-018-001-create-candles-table
+      author: andrei
+      comments: Create candles table for storing persisted market data.
+      changes:
+        - createTable:
+            tableName: candles
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_candles
+                    nullable: false
+
+              - column:
+                  name: market_data_subscription_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: trading_pair_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: timeframe_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: ingestion_run_id
+                  type: BIGINT
+
+              - column:
+                  name: open_time
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: close_time
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: open_price
+                  type: NUMERIC(38, 18)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: high_price
+                  type: NUMERIC(38, 18)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: low_price
+                  type: NUMERIC(38, 18)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: close_price
+                  type: NUMERIC(38, 18)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: volume
+                  type: NUMERIC(38, 18)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: quote_volume
+                  type: NUMERIC(38, 18)
+
+              - column:
+                  name: number_of_trades
+                  type: BIGINT
+
+              - column:
+                  name: taker_buy_base_volume
+                  type: NUMERIC(38, 18)
+
+              - column:
+                  name: taker_buy_quote_volume
+                  type: NUMERIC(38, 18)
+
+              - column:
+                  name: source
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: is_closed
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: BR-018-002-add-candles-foreign-keys
+      author: andrei
+      comments: Link candles to subscriptions, trading pairs, timeframes and ingestion runs.
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: candles
+            baseColumnNames: market_data_subscription_id
+            referencedTableName: market_data_subscriptions
+            referencedColumnNames: id
+            constraintName: fk_candles_subscription
+
+        - addForeignKeyConstraint:
+            baseTableName: candles
+            baseColumnNames: trading_pair_id
+            referencedTableName: trading_pairs
+            referencedColumnNames: id
+            constraintName: fk_candles_trading_pair
+
+        - addForeignKeyConstraint:
+            baseTableName: candles
+            baseColumnNames: timeframe_id
+            referencedTableName: timeframes
+            referencedColumnNames: id
+            constraintName: fk_candles_timeframe
+
+        - addForeignKeyConstraint:
+            baseTableName: candles
+            baseColumnNames: ingestion_run_id
+            referencedTableName: ingestion_runs
+            referencedColumnNames: id
+            constraintName: fk_candles_ingestion_run
+
+  - changeSet:
+      id: BR-018-003-create-candles-basic-indexes
+      author: andrei
+      comments: Add basic indexes for candle relationships.
+      changes:
+        - createIndex:
+            tableName: candles
+            indexName: idx_candles_subscription_id
+            columns:
+              - column:
+                  name: market_data_subscription_id
+
+        - createIndex:
+            tableName: candles
+            indexName: idx_candles_trading_pair_id
+            columns:
+              - column:
+                  name: trading_pair_id
+
+        - createIndex:
+            tableName: candles
+            indexName: idx_candles_timeframe_id
+            columns:
+              - column:
+                  name: timeframe_id
+
+        - createIndex:
+            tableName: candles
+            indexName: idx_candles_ingestion_run_id
+            columns:
+              - column:
+                  name: ingestion_run_id

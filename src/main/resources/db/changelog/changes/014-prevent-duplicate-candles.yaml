@@ -1,0 +1,36 @@
+databaseChangeLog:
+  - changeSet:
+      id: BR-019-001-add-candles-unique-constraint
+      author: andrei
+      comments: Prevent duplicate candles for the same trading pair, timeframe and open time.
+      changes:
+        - addUniqueConstraint:
+            tableName: candles
+            columnNames: trading_pair_id, timeframe_id, open_time
+            constraintName: uk_candles_pair_timeframe_open_time
+
+  - changeSet:
+      id: BR-019-002-create-candles-query-index
+      author: andrei
+      comments: Add index for querying candles by subscription and open time.
+      changes:
+        - createIndex:
+            tableName: candles
+            indexName: idx_candles_subscription_open_time
+            columns:
+              - column:
+                  name: market_data_subscription_id
+              - column:
+                  name: open_time
+
+  - changeSet:
+      id: BR-019-003-create-candles_open_time_index
+      author: andrei
+      comments: Add index for querying candles by open time.
+      changes:
+        - createIndex:
+            tableName: candles
+            indexName: idx_candles_open_time
+            columns:
+              - column:
+                  name: open_time
