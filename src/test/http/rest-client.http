@@ -1,0 +1,22 @@
+# ============================================================
+# BR-021 Binance REST client
+# ============================================================
+
+### Get latest BTCUSDT 4h klines from Binance
+GET {{baseUrl}}/api/binance/market-data/klines?symbol=BTCUSDT&interval=4h&limit=5
+
+
+### Get BTCUSDT 4h klines from Binance by time range
+GET {{baseUrl}}/api/binance/market-data/klines?symbol=BTCUSDT&interval=4h&startTime=2026-05-01T00:00:00Z&endTime=2026-05-05T00:00:00Z&limit=10
+
+
+### Get ETHUSDT 1h klines from Binance
+GET {{baseUrl}}/api/binance/market-data/klines?symbol=ETHUSDT&interval=1h&limit=5
+
+
+### Invalid symbol test
+GET {{baseUrl}}/api/binance/market-data/klines?symbol=INVALIDPAIR&interval=4h&limit=5
+
+
+### Invalid limit test
+GET {{baseUrl}}/api/binance/market-data/klines?symbol=BTCUSDT&interval=4h&limit=2000
