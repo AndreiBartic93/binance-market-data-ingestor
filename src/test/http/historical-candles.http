@@ -1,0 +1,46 @@
+# ============================================================
+# BR-022 Import historical candles by subscription
+# ============================================================
+
+@btcUsdt4hSubscriptionId = 1
+
+### Import BTCUSDT 4h historical candles by subscription
+POST {{baseUrl}}/api/ingestion/historical/subscriptions/{{btcUsdt4hSubscriptionId}}/import
+Content-Type: application/json
+
+{
+  "fromTime": "2026-05-01T00:00:00Z",
+  "toTime": "2026-05-21T00:00:00Z",
+  "limit": 1000,
+  "metadata": {
+    "triggeredBy": "manual-http-test",
+    "note": "BR-022 first historical import test"
+  }
+}
+
+
+### Import again to verify duplicates are skipped
+POST {{baseUrl}}/api/ingestion/historical/subscriptions/{{btcUsdt4hSubscriptionId}}/import
+Content-Type: application/json
+
+{
+  "fromTime": "2026-05-01T00:00:00Z",
+  "toTime": "2026-05-21T00:00:00Z",
+  "limit": 1000,
+  "metadata": {
+    "triggeredBy": "manual-http-test",
+    "note": "Duplicate skip test"
+  }
+}
+
+
+### Check candles after import
+GET {{baseUrl}}/api/candles?marketDataSubscriptionId={{btcUsdt4hSubscriptionId}}
+
+
+### Check ingestion runs
+GET {{baseUrl}}/api/ingestion-runs
+
+
+### Check successful runs
+GET {{baseUrl}}/api/ingestion-runs?status=SUCCESS
