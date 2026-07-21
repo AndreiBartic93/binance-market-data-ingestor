@@ -25,3 +25,9 @@ This service does not execute trades, generate trading signals, or perform backt
 | BR-021 | Add Binance REST client |
 | BR-022 | Import historical candles by subscription |
 | BR-024 | Update watermark after successful import |
+
+
+BR-025 Add scheduled ingestion sync
+BR-026 Import candles by ingestion profile
+BR-027 Add pagination for large historical imports
+BR-028 Add retry and error handling for Binance ingestion

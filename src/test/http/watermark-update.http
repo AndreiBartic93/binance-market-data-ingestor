@@ -1,0 +1,53 @@
+# ============================================================
+# BR-024 Update watermark after successful import
+# ============================================================
+
+@btcUsdt4hSubscriptionId = 1
+
+### Check watermark before import
+GET {{baseUrl}}/api/ingestion-watermarks/subscription/{{btcUsdt4hSubscriptionId}}
+
+
+### Import BTCUSDT 4h historical candles and update watermark
+POST {{baseUrl}}/api/ingestion/historical/subscriptions/{{btcUsdt4hSubscriptionId}}/import
+Content-Type: application/json
+
+{
+  "fromTime": "2026-05-01T00:00:00Z",
+  "toTime": "2026-05-21T00:00:00Z",
+  "limit": 1000,
+  "metadata": {
+    "triggeredBy": "manual-http-test",
+    "note": "BR-024 watermark update test"
+  }
+}
+
+
+### Check watermark after import
+GET {{baseUrl}}/api/ingestion-watermarks/subscription/{{btcUsdt4hSubscriptionId}}
+
+
+### Import without fromTime, should continue from watermark
+POST {{baseUrl}}/api/ingestion/historical/subscriptions/{{btcUsdt4hSubscriptionId}}/import
+Content-Type: application/json
+
+{
+  "toTime": "2026-05-25T00:00:00Z",
+  "limit": 1000,
+  "metadata": {
+    "triggeredBy": "manual-http-test",
+    "note": "BR-024 continue from watermark test"
+  }
+}
+
+
+### Check candles
+GET {{baseUrl}}/api/candles?marketDataSubscriptionId={{btcUsdt4hSubscriptionId}}
+
+
+### Check ingestion runs
+GET {{baseUrl}}/api/ingestion-runs
+
+
+### Check successful runs
+GET {{baseUrl}}/api/ingestion-runs?status=SUCCESS

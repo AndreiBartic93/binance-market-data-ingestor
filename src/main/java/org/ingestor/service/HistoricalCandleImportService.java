@@ -89,19 +89,25 @@ public class HistoricalCandleImportService {
                     run
             );
 
-            completeRun(
+            boolean watermarkUpdated = completeRunAndUpdateWatermark(
                     run,
+                    subscription,
                     limit,
                     klines.size(),
                     stats
             );
+
+            String message = watermarkUpdated
+                    ? "Historical import finished and watermark was updated successfully."
+                    : "Historical import finished, but watermark was not updated because no closed candle was processed.";
 
             return toResponse(
                     run,
                     subscription,
                     stats.firstImportedOpenTime(),
                     stats.lastImportedOpenTime(),
-                    "Historical import finished. Watermark was not updated yet; this will be handled in BR-024."
+                    watermarkUpdated,
+                    message
             );
 
         } catch (Exception exception) {
@@ -112,6 +118,7 @@ public class HistoricalCandleImportService {
                     subscription,
                     null,
                     null,
+                    false,
                     "Historical import failed: " + exception.getMessage()
             );
         }
@@ -119,9 +126,7 @@ public class HistoricalCandleImportService {
 
     private void validateSubscription(MarketDataSubscription subscription) {
         if (!subscription.isActive()) {
-            throw new IllegalArgumentException(
-                    "Market data subscription is inactive."
-            );
+            throw new IllegalArgumentException("Market data subscription is inactive.");
         }
 
         if (!subscription.isCollectHistorical()) {
@@ -180,9 +185,7 @@ public class HistoricalCandleImportService {
         }
 
         if (limit < 1 || limit > 1000) {
-            throw new IllegalArgumentException(
-                    "Limit must be between 1 and 1000."
-            );
+            throw new IllegalArgumentException("Limit must be between 1 and 1000.");
         }
 
         return limit;
@@ -193,9 +196,7 @@ public class HistoricalCandleImportService {
             OffsetDateTime toTime
     ) {
         if (!fromTime.isBefore(toTime)) {
-            throw new IllegalArgumentException(
-                    "fromTime must be before toTime."
-            );
+            throw new IllegalArgumentException("fromTime must be before toTime.");
         }
     }
 
@@ -214,7 +215,7 @@ public class HistoricalCandleImportService {
         }
 
         metadata.put("trigger", "manual-historical-import");
-        metadata.put("source", "BR-022");
+        metadata.put("source", "BR-024");
         metadata.put("binanceLimit", limit);
         metadata.put("watermarkUpdated", false);
 
@@ -250,12 +251,28 @@ public class HistoricalCandleImportService {
         OffsetDateTime firstImportedOpenTime = null;
         OffsetDateTime lastImportedOpenTime = null;
 
+        OffsetDateTime lastSuccessfulOpenTime = null;
+        OffsetDateTime lastSuccessfulCloseTime = null;
+
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
 
         for (BinanceKlineResponse kline : klines) {
             if (!isClosed(kline, now)) {
                 skipped++;
                 continue;
+            }
+
+            if (firstImportedOpenTime == null || kline.openTime().isBefore(firstImportedOpenTime)) {
+                firstImportedOpenTime = kline.openTime();
+            }
+
+            if (lastImportedOpenTime == null || kline.openTime().isAfter(lastImportedOpenTime)) {
+                lastImportedOpenTime = kline.openTime();
+            }
+
+            if (lastSuccessfulOpenTime == null || kline.openTime().isAfter(lastSuccessfulOpenTime)) {
+                lastSuccessfulOpenTime = kline.openTime();
+                lastSuccessfulCloseTime = kline.closeTime();
             }
 
             boolean alreadyExists = candleRepository.existsByTradingPairIdAndTimeframeIdAndOpenTime(
@@ -290,16 +307,7 @@ public class HistoricalCandleImportService {
                     .build();
 
             candleRepository.save(candle);
-
             inserted++;
-
-            if (firstImportedOpenTime == null || kline.openTime().isBefore(firstImportedOpenTime)) {
-                firstImportedOpenTime = kline.openTime();
-            }
-
-            if (lastImportedOpenTime == null || kline.openTime().isAfter(lastImportedOpenTime)) {
-                lastImportedOpenTime = kline.openTime();
-            }
         }
 
         return new CandleImportStats(
@@ -307,7 +315,9 @@ public class HistoricalCandleImportService {
                 skipped,
                 0L,
                 firstImportedOpenTime,
-                lastImportedOpenTime
+                lastImportedOpenTime,
+                lastSuccessfulOpenTime,
+                lastSuccessfulCloseTime
         );
     }
 
@@ -318,8 +328,9 @@ public class HistoricalCandleImportService {
         return !kline.closeTime().isAfter(now);
     }
 
-    private void completeRun(
+    private boolean completeRunAndUpdateWatermark(
             IngestionRun run,
+            MarketDataSubscription subscription,
             int requestedLimit,
             int receivedCount,
             CandleImportStats stats
@@ -333,6 +344,12 @@ public class HistoricalCandleImportService {
         run.setRecordsSkipped(stats.skipped());
         run.setRecordsFailed(stats.failed());
 
+        boolean watermarkUpdated = updateWatermarkAfterSuccess(
+                subscription,
+                run,
+                stats
+        );
+
         Map<String, Object> metadata = new HashMap<>();
 
         if (run.getMetadata() != null) {
@@ -341,11 +358,40 @@ public class HistoricalCandleImportService {
 
         metadata.put("firstImportedOpenTime", stats.firstImportedOpenTime());
         metadata.put("lastImportedOpenTime", stats.lastImportedOpenTime());
-        metadata.put("note", "Watermark not updated in BR-022.");
+        metadata.put("lastSuccessfulOpenTime", stats.lastSuccessfulOpenTime());
+        metadata.put("lastSuccessfulCloseTime", stats.lastSuccessfulCloseTime());
+        metadata.put("watermarkUpdated", watermarkUpdated);
 
         run.setMetadata(metadata);
 
         ingestionRunRepository.save(run);
+
+        return watermarkUpdated;
+    }
+
+    private boolean updateWatermarkAfterSuccess(
+            MarketDataSubscription subscription,
+            IngestionRun run,
+            CandleImportStats stats
+    ) {
+        if (stats.lastSuccessfulOpenTime() == null || stats.lastSuccessfulCloseTime() == null) {
+            return false;
+        }
+
+        IngestionWatermark watermark = watermarkRepository
+                .findByMarketDataSubscriptionId(subscription.getId())
+                .orElseGet(() -> IngestionWatermark.builder()
+                        .marketDataSubscription(subscription)
+                        .build()
+                );
+
+        watermark.setLastSuccessfulOpenTime(stats.lastSuccessfulOpenTime());
+        watermark.setLastSuccessfulCloseTime(stats.lastSuccessfulCloseTime());
+        watermark.setLastIngestionRunId(run.getId());
+
+        watermarkRepository.save(watermark);
+
+        return true;
     }
 
     private void failRun(
@@ -375,6 +421,7 @@ public class HistoricalCandleImportService {
             MarketDataSubscription subscription,
             OffsetDateTime firstImportedOpenTime,
             OffsetDateTime lastImportedOpenTime,
+            boolean watermarkUpdated,
             String message
     ) {
         return new ImportHistoricalCandlesResponse(
@@ -398,7 +445,7 @@ public class HistoricalCandleImportService {
                 firstImportedOpenTime,
                 lastImportedOpenTime,
 
-                false,
+                watermarkUpdated,
 
                 message,
 
@@ -412,7 +459,9 @@ public class HistoricalCandleImportService {
             Long skipped,
             Long failed,
             OffsetDateTime firstImportedOpenTime,
-            OffsetDateTime lastImportedOpenTime
+            OffsetDateTime lastImportedOpenTime,
+            OffsetDateTime lastSuccessfulOpenTime,
+            OffsetDateTime lastSuccessfulCloseTime
     ) {
     }
 }
