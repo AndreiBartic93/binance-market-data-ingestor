@@ -42,4 +42,33 @@ public interface IngestionProfileSubscriptionRepository extends JpaRepository<In
             @Param("marketDataSubscriptionId") Long marketDataSubscriptionId,
             @Param("ingestionMethod") IngestionMethod ingestionMethod
     );
+
+    @Query("""
+        SELECT link
+        FROM IngestionProfileSubscription link
+        JOIN FETCH link.ingestionProfile profile
+        JOIN FETCH link.marketDataSubscription subscription
+        JOIN FETCH subscription.tradingPair
+        JOIN FETCH subscription.timeframe
+        WHERE link.active = true
+          AND profile.active = true
+          AND profile.ingestionMethod = :ingestionMethod
+          AND subscription.active = true
+          AND subscription.collectScheduled = true
+        ORDER BY link.id
+        """)
+    List<IngestionProfileSubscription> findActiveScheduledLinks(
+            @Param("ingestionMethod") IngestionMethod ingestionMethod
+    );
+
+    @Query("""
+        SELECT link
+        FROM IngestionProfileSubscription link
+        JOIN FETCH link.ingestionProfile profile
+        JOIN FETCH link.marketDataSubscription subscription
+        JOIN FETCH subscription.tradingPair
+        JOIN FETCH subscription.timeframe
+        WHERE link.id = :id
+        """)
+    Optional<IngestionProfileSubscription> findByIdWithDetails(@Param("id") Long id);
 }

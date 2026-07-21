@@ -33,3 +33,11 @@ management:
 binance:
   rest:
     base-url: https://api.binance.com
+
+ingestion:
+  scheduled:
+    enabled: true
+    fixed-delay-ms: 300000
+    initial-delay-ms: 30000
+    limit: 1000
+    max-subscriptions-per-run: 50
